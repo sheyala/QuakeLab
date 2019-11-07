@@ -29,13 +29,13 @@ def plot_spectrum(f, fas, key):
     Plotting utility for Fourier amplitude spectra visualisation
     """
 
-    _plt.figure(figsize=(7.1,5.0))
+    _plt.figure(figsize=(8.0,5.0))
     _plt.grid('on')
     _plt.xscale('log')
     _plt.yscale('log')
     if(key=='a'):
-        _plt.ylim(1e-05, 0.1)
-        _plt.xlim(0.055, 33)
+        _plt.ylim(1e-08, 5)
+        _plt.xlim(0.035, 56)
     _plt.xlabel(FAS_LABELS['f'])
     _plt.ylabel(FAS_LABELS[key])
     _plt.plot(f, fas, linestyle='--', color='green')
@@ -147,6 +147,7 @@ def pd_attenuation(f, r, path, site):
     """
 
     t_star = (r / (path.Q0*path.beta)) + site.k
+    t_star = 0.031
 
     pda = fd_site_ampl(f) * math.exp(-math.pi*f*t_star)
 
@@ -217,8 +218,8 @@ def appar_geom_spreading(r):
     """
 
     R0 = 1000.
-    R1 = 150000.
-    B1 = -1.
+    R1 = 70000.
+    B1 = -1.14
     B2 = -0.5
 
     if(r <= R1):
@@ -299,22 +300,31 @@ def fourier_ampl_spectrum(f, r, event, path, site, comp):
 # create sample case with parameters for event, path and site 
 # characterization taken from literature
 
-ev_irp = Event_Params("Irpinia", 1.8e+18, 0.07)
-path_irp = Path_Params(2800, 3500, 1000)
-site_irp = Site_Params(347, 0.04, 1.)
+ev_irp = Event_Params("Irpinia", 2.95e+19, 0.07)
+path_irp = Path_Params(2800, 3500, 1059)
+site_irp = Site_Params(347, 0.025, 1.)
+r_irp = 30000.
 
-r = 30000.
+ev_1 = Event_Params("N/A", 6.67e+17, 0.45)
+path_1 = Path_Params(2800, 3500, 1059)
+site_1 = Site_Params(174, 0.0243, 1.)
+r_1 = 25000.
 
-freqs = _np.arange(0.05, 50.05, 0.05)
+ev_2 = Event_Params("N/A", 2.286e+15, 1.88)
+path_2 = Path_Params(2800, 3500, 1059)
+site_2 = Site_Params(174, 1.18795, 1.)
+r_2 = 24000.
+
+freqs = _np.arange(0.04, 50.01, 0.01)
 acc_spectrum = [0 for i in range(len(freqs))]
 vel_spectrum = [0 for i in range(len(freqs))]
 dis_spectrum = [0 for i in range(len(freqs))]
 
 i = 0
 for f in freqs:
-    acc_spectrum[i] = fourier_ampl_spectrum(f, r, ev_irp, path_irp, site_irp, 2)
-    vel_spectrum[i] = fourier_ampl_spectrum(f, r, ev_irp, path_irp, site_irp, 1)
-    dis_spectrum[i] = fourier_ampl_spectrum(f, r, ev_irp, path_irp, site_irp, 0)
+    acc_spectrum[i] = fourier_ampl_spectrum(f, r_1, ev_1, path_1, site_1, 2)
+    vel_spectrum[i] = fourier_ampl_spectrum(f, r_1, ev_1, path_1, site_1, 1)
+    dis_spectrum[i] = fourier_ampl_spectrum(f, r_1, ev_1, path_1, site_1, 0)
     i += 1
 
 plot_spectrum(freqs, _np.array(acc_spectrum), 'a')
