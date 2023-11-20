@@ -26,7 +26,7 @@ import warnings
 from shakelab.signals import base
 from shakelab.signals.xmltemplate import initialize_metadata
 from shakelab.signals.xmlparser import read_stationxml
-from shakelab.signals.polezero import SensorResponse, paz_map
+from shakelab.signals.polezero import paz_map
 from shakelab.libutils.time import Date
 
 
@@ -84,11 +84,10 @@ class Metadata():
             Format of the input metadata, used to choose the called parser;
             optional (default is 'stationxml')
 
-        :param [str, dict, StreamId] sid: 
+        :param [str] sid: 
             Network.code, Station.code, Channel.locationCode and Channel.code 
-            for which metadata should be loaded. Can be a ``StreamId`` object, 
-            an FDSN nslc string, or a dictionary (must include keys 'network', 
-            'station', 'channel' and 'location'); optional (default is ``None``)
+            for which metadata should be loaded. Has to be in the form of 
+            an FDSN nslc string, 'network.station.location.channel'
 
         :param [str, Date] time: 
             The operating time for which information is required for the 
@@ -121,9 +120,10 @@ class Metadata():
         NOTE: in order for the 'time' option to work, self.data must include 
         information at least at 'channel' level (no automatic check is made!)
 
-        :param [str, dict, list, tuple, StreamId] sid: 
+        :param [str] sid: 
             Network.code, Station.code, Channel.locationCode and Channel.code 
-            for which metadata should be kept. 
+            for which metadata should be kept. Has to be in the form of 
+            an FDSN nslc string, 'network.station.location.channel'  
 
         :param [str, Date] time: 
             The operating time for which information is required for the 
@@ -224,11 +224,12 @@ def find_lst_indexes(lst, key, value, time=None):
                 if time:
                     if not isinstance(time, Date):
                         time = Date(time)
-                    st_time = dic['startDate']
+                    st_time = Date(str(dic['startDate']))
                     try:
-                        end_time = dic['endDate']
+                        end_time = Date(str(dic['endDate']))
                     except:
-                        end_time = None 
+                        end_time = None
+                        # end_time = Date('2599-12-31T00:00:00.000000Z')
                     if (time<=st_time):
                         continue
                     if end_time and (time>=end_time):
@@ -259,9 +260,10 @@ def load_metadata(mdfile, format='stationxml', sid=None, time=None,
     :param [str] format:
         Format of the input metadata; optional (default is 'stationxml')
 
-    :param [str, dict, list, tuple, StreamId] sid: 
-        Network.code, Station.code, Channel.locationCode and Channel.code for 
-        which metadata should be loaded; optional
+    :param [str] sid: 
+        Network.code, Station.code, Channel.locationCode and Channel.code 
+        for which metadata should be loaded. Has to be in the form of 
+        an FDSN nslc string, 'network.station.location.channel' ; optional
 
     :param [str, Date] time: 
         The operating time for which information is required for the selected
@@ -303,12 +305,10 @@ def select_nslc(metadata, sid, time=None):
         Dictionary compliant to the FDSN metadata standard; can be a 
         ``Metadata.data`` instance    
     
-    :param [str, dict, list, tuple, StreamId] sid: 
-        Network.code, Station.code, Channel.locationCode and Channel.code for 
-        which metadata should be loaded. Can be a ``StreamId`` object, an FDSN 
-        nslc string ('network.station.location.channel'), a list, a tuple or a 
-        dictionary (must include keys 'network', 'station', 'channel' and 
-        'location')
+    :param [str] sid: 
+        Network.code, Station.code, Channel.locationCode and Channel.code 
+        for which metadata should be loaded. Has to be in the form of 
+        an FDSN nslc string, 'network.station.location.channel'
     
     :param [str, Date] time: 
         The operating time for which information is required for the selected
@@ -325,12 +325,10 @@ def select_nslc(metadata, sid, time=None):
 
     filtered_md = deepcopy(metadata)
     try:
-        if not isinstance(sid, base.StreamId):
-            sid = base.StreamId(sid)
-        net = sid.network
-        sta = sid.station
-        loc = sid.location
-        cha = sid.channel
+        net = sid.split('.')[0]
+        sta = sid.split('.')[1]
+        loc = sid.split('.')[2]
+        cha = sid.split('.')[3]
 
     except:
         warnings.warn("Selection of metadata for '%s' failed " % sid, 

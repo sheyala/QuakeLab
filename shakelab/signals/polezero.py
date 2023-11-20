@@ -24,7 +24,7 @@ import os as _os
 import json as _json
 import numpy as np
 
-from shakelab.signals.fourier import fft, ifft, fft_axis
+# from shakelab.signals.fourier import fft, ifft, fft_axis
 
 
 paz_map = {
@@ -106,16 +106,16 @@ def sensor_transfer_function(frequency, paz):
 def remove_sensor_response(record, polezeros, wlev=0.1):
     """
     """
-    spec = fft(record.data)
-    freq = fft_axis(len(record), record.dt)
-    resp = sensor_response(freq, polezeros)
+    # spec = fft(record.data)
+    # freq = fft_axis(len(record), record.dt)
+    # resp = sensor_response(freq, polezeros)
 
-    # Compute inverse, including waterlevel
-    i0 = (resp != 0.)
-    resp[i0] = np.conj(resp[i0])/(resp[i0]*np.conj(resp[i0]) + wlev)
+    # # Compute inverse, including waterlevel
+    # i0 = (resp != 0.)
+    # resp[i0] = np.conj(resp[i0])/(resp[i0]*np.conj(resp[i0]) + wlev)
 
-    return np.real(ifft(spec * resp))
-
+    # return np.real(ifft(spec * resp))
+    pass
 
 
 

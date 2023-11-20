@@ -112,5 +112,6 @@ TIMEZONE = {
 "WET" : {"label" : "(UTC+01:00) Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna", "delay" : 1.0},
 "WPST" : {"label" : "(UTC+10:00) Guam, Port Moresby", "delay" : 10.0},
 "YAKT" : {"label" : "(UTC+09:00) Yakutsk", "delay" : 9.0},
-"YEKT" : {"label" : "(UTC+05:00) Ekaterinburg", "delay" : 5.0}
+"YEKT" : {"label" : "(UTC+05:00) Ekaterinburg", "delay" : 5.0},
+"Z" : {"label" : "(UTC) Greenwich", "delay" : 0.0}
 }

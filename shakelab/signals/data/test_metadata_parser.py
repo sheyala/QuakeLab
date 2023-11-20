@@ -26,7 +26,6 @@ import shakelab.signals.metadata as slmd
 # responses)
 file_in = 'TT_T01.xml'
 
-
 # load all the information contained in T01.xml at level 'response'
 #------------------------------------------------------------------
 md_t01 = slmd.Metadata(mdfile=file_in, level='response')

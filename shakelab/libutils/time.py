@@ -28,7 +28,7 @@ DSEC = 86400.
 YDAYS = 365.
 
 from decimal import Decimal
-
+from shakelab.libutils.timezones import TIMEZONE
 
 class Date(object):
     """
@@ -69,6 +69,18 @@ class Date(object):
 
         return (t0 < t1)
 
+
+    def __le__(self, value):
+        """
+        """
+        t0 = self.to_seconds(decimal=True)
+        if isinstance(value, Date):
+            t1 = value.to_seconds(decimal=True)
+        else:
+            t1 = Decimal(value)
+
+        return (t0 <= t1)
+
     def __gt__(self, value):
         """
         """
@@ -79,6 +91,18 @@ class Date(object):
             t1 = Decimal(value)
 
         return (t0 > t1)
+
+    def __ge__(self, value):
+        """
+        """
+        t0 = self.to_seconds(decimal=True)
+        if isinstance(value, Date):
+            t1 = value.to_seconds(decimal=True)
+        else:
+            t1 = Decimal(value)
+
+        return (t0 >= t1)
+
 
     def __add__(self, value):
         """
@@ -121,7 +145,7 @@ class Date(object):
 
     def set_date(self, date, format='calendar'):
         """
-        TO DO: parse date as ISO8601 string (calendar and ordinal)
+        added parsing date as ISO8601 string (calendar and ordinal)
         TO DO: create an external syntax parser
         """
         if isinstance(date, (list, tuple)):
@@ -156,6 +180,12 @@ class Date(object):
             else:
                 raise ValueError('Seconds must be between 0 and 60')
 
+            if len(date) > 6:
+                tzinfo = str(date[6])
+                if tzinfo in TIMEZONE.keys():
+                    self.shift_time(-TIMEZONE[tzinfo]['delay'], units='h')
+
+
         elif isinstance(date, dict):
 
             self.year = date['year']
@@ -169,11 +199,21 @@ class Date(object):
             else:
                 self.month = date['month']
 
+            try:
+                tzinfo = date['tzinfo']
+                if tzinfo in TIMEZONE.keys():
+                    self.shift_time(-TIMEZONE[tzinfo]['delay'], units='h')
+            except:
+                pass
+
         elif isinstance(date, str):
 
             date = date.replace('-', '')
             date = date.replace(':', '')
-            date = date.replace('T', '')
+            date = date.replace('T', '', 1)
+
+            tzinfo = ''.join(filter(lambda z: z not in '0123456789.', date))
+            date = ''.join(filter(lambda z: z in '0123456789.', date))
 
             if format in ('calendar', 'gregorian'):
                 self.year = int(date[0:4])
@@ -193,6 +233,10 @@ class Date(object):
                 # Convert total days to month/day
                 (self.month, self.day) = days_to_month(self.year, julian_day)
 
+            # Apply UTC conversion
+            if tzinfo in TIMEZONE.keys():
+                self.shift_time(-TIMEZONE[tzinfo]['delay'], units='h')
+
         elif isinstance(date, (int, float, Decimal)):
 
             self.from_seconds(date)
@@ -202,6 +246,7 @@ class Date(object):
 
     def get_date(self, dtype='list', format='calendar'):
         """
+        Returns date in UTC time
         """
         if dtype in ('l', 'list'):
 
@@ -249,7 +294,7 @@ class Date(object):
             seconds = time * MSEC
         elif units in ['h', 'hour', 'hours']:
             seconds = time * HSEC
-        elif unit in ['d', 'day', 'days']:
+        elif units in ['d', 'day', 'days']:
             seconds = time * DSEC
         else:
             print('Time units not yet implemented')
@@ -339,7 +384,7 @@ def sec_to_date(second):
         secy = YDAYS * DSEC
         if leap_check(year):
             secy += DSEC
-        if second > secy:
+        if second >= secy:
             second -= secy
         else:
             break
